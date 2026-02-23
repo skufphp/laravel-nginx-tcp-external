@@ -14,7 +14,9 @@ services:
       XDEBUG_CLIENT_HOST: ${XDEBUG_CLIENT_HOST}
     networks:
       - laravel-nginx-tcp-network
+      # При переключении БД меняйте сеть на нужную:
       - postgres-dev-network
+      # - mysql-dev-network
     healthcheck:
       test:
         [
@@ -53,4 +55,6 @@ networks:
     external: true
 
   postgres-dev-network:
+    external: true
+  mysql-dev-network:
     external: true

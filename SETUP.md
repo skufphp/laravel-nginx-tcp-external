@@ -69,6 +69,17 @@ services:
 
 Если БД находится в Docker (в другом compose-проекте), app-контейнер должен быть в той же сети. В шаблоне по умолчанию в `docker-compose.yml` подключена внешняя сеть `postgres-dev-network`. При переключении БД не забудьте переключить и сеть: либо `postgres-dev-network`, либо `mysql-dev-network` (или удалите этот network, если вы ходите в managed DB/наружу Docker).
 
+Переключение делается прямо в `services.laravel-php-nginx-tcp.networks`:
+
+```yml
+services:
+  laravel-php-nginx-tcp:
+    networks:
+      - laravel-nginx-tcp-network
+      - postgres-dev-network
+      # - mysql-dev-network
+```
+
 ### 2.2 PostgreSQL (external)
 
 В external-модели (внешняя БД) Laravel **не создаёт базы данных** автоматически. Команда `php artisan migrate` создаёт таблицы, но не делает `CREATE DATABASE`.
