@@ -16,12 +16,12 @@ COMPOSE_PROD = docker compose -f docker-compose.yml -f docker-compose.prod.yml
 COMPOSE = $(COMPOSE_DEV)
 
 # Сервисы (имена сервисов из compose-файлов)
-PHP_SERVICE=laravel-php-nginx-socket
-NGINX_SERVICE=laravel-nginx-socket
-NODE_SERVICE=laravel-node-nginx-socket
+PHP_SERVICE=laravel-php-nginx-tcp
+NGINX_SERVICE=laravel-nginx-tcp
+NODE_SERVICE=laravel-node-nginx-tcp
 
 help: ## Показать справку
-	@echo "$(YELLOW)Laravel Docker Boilerplate (Unix Socket)$(NC)"
+	@echo "$(YELLOW)Laravel Docker Boilerplate (TCP)$(NC)"
 	@echo "======================================"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 
