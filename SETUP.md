@@ -1,9 +1,9 @@
-# SETUP — Laravel Boilerplate (PHP-FPM + Nginx TCP + External PostgreSQL + External Redis Cluster)
+# SETUP — Laravel Boilerplate (PHP-FPM + Nginx TCP + External PostgreSQL/MySQL + External Redis Cluster)
 
 Этот boilerplate предназначен для быстрого старта Laravel-проекта в Docker Compose, где:
 - **внутри Compose живут только app-сервисы** (PHP-FPM + Nginx + Node/Vite в dev);
 - **PHP-FPM и Nginx взаимодействуют по TCP** (порт 9000);
-- **PostgreSQL — внешний** (managed DB или отдельный сервер/кластер);
+- **PostgreSQL/MySQL — внешний** (managed DB или отдельный сервер/кластер);
 - **Redis Cluster — внешний** (managed Redis Cluster или отдельный кластер);
 - миграции запускаются **one-off** сервисом `migrate` (prod-like подход).
 
@@ -15,7 +15,7 @@
 - Docker + Docker Compose (plugin)
 - Make (обычно есть на macOS)
 - Доступ к внешним сервисам:
-    - PostgreSQL: `host:port`, база, пользователь, пароль
+    - PostgreSQL или MySQL: `host:port`, база, пользователь, пароль
     - Redis Cluster: список нод `host:port,host:port,...`, пароль/ACL (если есть), TLS (если требуется)
 
 ---
@@ -44,7 +44,32 @@ composer create-project laravel/laravel .
 
 > Важно: в external-модели **нет** контейнеров БД/Redis внутри Compose, поэтому `DB_HOST` и Redis-параметры **должны указывать на внешние endpoints**.
 
-### 2.1 PostgreSQL (external)
+### 2.1 Выбор базы данных (PostgreSQL / MySQL) и переключение Dockerfile
+
+В этом boilerplate есть два Dockerfile для PHP:
+
+- `docker/php.pgsql.Dockerfile` — PHP с расширениями `pdo_pgsql/pgsql`
+- `docker/php.mysql.Dockerfile` — PHP с расширениями `pdo_mysql/mysqli`
+
+Чтобы переключиться, в `docker-compose.yml` у сервиса `laravel-php-nginx-tcp` поменяйте `build.dockerfile`:
+
+```yml
+services:
+  laravel-php-nginx-tcp:
+    build:
+      context: ./docker
+      dockerfile: php.pgsql.Dockerfile # или php.mysql.Dockerfile
+      target: php-base
+```
+
+Также синхронизируйте `.env` Laravel:
+
+- для PostgreSQL: `DB_CONNECTION=pgsql`, `DB_PORT=5432`
+- для MySQL: `DB_CONNECTION=mysql`, `DB_PORT=3306`
+
+Если БД находится в Docker (в другом compose-проекте), app-контейнер должен быть в той же сети. В шаблоне по умолчанию в `docker-compose.yml` подключена внешняя сеть `postgres-dev-network` — при использовании MySQL обычно потребуется заменить её на вашу MySQL-сеть (или удалить этот network, если вы ходите в managed DB/наружу Docker).
+
+### 2.2 PostgreSQL (external)
 
 В external-модели (внешняя БД) Laravel **не создаёт базы данных** автоматически. Команда `php artisan migrate` создаёт таблицы, но не делает `CREATE DATABASE`.
 
@@ -111,9 +136,55 @@ php artisan migrate
 dotenv
 DB_SSLMODE=require
 ```
+
+### 2.3 MySQL (external)
+
+Аналогично PostgreSQL: в external-модели Laravel **не создаёт** базу автоматически — её нужно создать заранее.
+
+#### 1) Шаблон: “1 проект = 1 база + 1 пользователь”
+
+Пример для проекта `app1`:
+- база: `app1_db`
+- пользователь: `app1_user`
+- пароль: `<PASSWORD_PLACEHOLDER>`
+
+**Создание через SQL (пример):**
+
+```sql
+CREATE DATABASE app1_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'app1_user'@'%' IDENTIFIED BY '<PASSWORD_PLACEHOLDER>';
+GRANT ALL PRIVILEGES ON app1_db.* TO 'app1_user'@'%';
+FLUSH PRIVILEGES;
+```
+
+#### 2) Настройка `.env`
+
+В вашем `.env` установите:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=<mysql_service_or_host>
+DB_PORT=3306
+DB_DATABASE=app1_db
+DB_USERNAME=app1_user
+DB_PASSWORD=<PASSWORD_PLACEHOLDER>
+```
+
+После изменения `.env` обязательно сбросьте кэш конфигурации:
+
+```bash
+php artisan config:clear
+php artisan cache:clear
+```
+
+Дальше запускайте миграции:
+
+```bash
+php artisan migrate
+```
 ---
 
-### 2.2 Redis Cluster (external)
+### 2.4 Redis Cluster (external)
 Этот boilerplate предполагает контракт через переменные окружения.
 
 Добавьте в `.env` (если используете Redis):
@@ -132,7 +203,7 @@ REDIS_TLS=false
 
 ---
 
-### 2.3 Docker/dev-переменные
+### 2.5 Docker/dev-переменные
 В dev обычно достаточно порта Nginx и опционально Xdebug.
 
 Вы можете:
