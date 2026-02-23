@@ -1,7 +1,8 @@
-# SETUP — Laravel Boilerplate (PHP-FPM + Nginx Unix Socket + External PostgreSQL + External Redis Cluster)
+# SETUP — Laravel Boilerplate (PHP-FPM + Nginx TCP + External PostgreSQL + External Redis Cluster)
 
 Этот boilerplate предназначен для быстрого старта Laravel-проекта в Docker Compose, где:
 - **внутри Compose живут только app-сервисы** (PHP-FPM + Nginx + Node/Vite в dev);
+- **PHP-FPM и Nginx взаимодействуют по TCP** (порт 9000);
 - **PostgreSQL — внешний** (managed DB или отдельный сервер/кластер);
 - **Redis Cluster — внешний** (managed Redis Cluster или отдельный кластер);
 - миграции запускаются **one-off** сервисом `migrate` (prod-like подход).

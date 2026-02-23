@@ -1,10 +1,10 @@
-# Laravel Boilerplate (PHP-FPM + Nginx Unix Socket + External PostgreSQL + External Redis Cluster)
+# Laravel Boilerplate (PHP-FPM + Nginx TCP + External PostgreSQL + External Redis Cluster)
 
 Этот репозиторий представляет собой **boilerplate** для быстрого развертывания Laravel-проектов с оптимизированной архитектурой взаимодействия сервисов и **внешней инфраструктурой** (БД и Redis не поднимаются в Docker Compose).
 
 ## Особенности
 
-*   **Производительность:** связь между Nginx и PHP-FPM настроена через **Unix Socket**.
+*   **Производительность:** связь между Nginx и PHP-FPM настроена через **TCP (порт 9000)**.
 *   **External infra friendly:** **PostgreSQL и Redis Cluster — внешние**, подключение только через переменные окружения.
 *   **Автоматизация:** набор команд в `Makefile` для управления контейнерами и Laravel.
 *   **Xdebug:** готов к включению одной переменной в `.env`.
