@@ -1,5 +1,5 @@
 # ==========================================
-# Laravel PHP-FPM TCP (Boilerplate)
+# Laravel PHP-FPM + Nginx TCP (Boilerplate)
 # ==========================================
 
 .PHONY: \
