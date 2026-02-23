@@ -1,0 +1,56 @@
+services:
+  # Laravel PHP-FPM
+  laravel-php-nginx-tcp:
+    build:
+      context: ./docker
+      dockerfile: php.Dockerfile
+      target: php-base
+    container_name: laravel-php-nginx-tcp
+    restart: unless-stopped
+    working_dir: /var/www/laravel
+    environment:
+      XDEBUG_MODE: ${XDEBUG_MODE}
+      XDEBUG_START: ${XDEBUG_START}
+      XDEBUG_CLIENT_HOST: ${XDEBUG_CLIENT_HOST}
+    networks:
+      - laravel-nginx-tcp-network
+      - postgres-dev-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q 'pong'"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Веб-сервер Nginx
+  laravel-nginx-tcp:
+    build:
+      context: ./docker
+      dockerfile: nginx.Dockerfile
+    container_name: laravel-nginx-tcp
+    restart: unless-stopped
+    networks:
+      - laravel-nginx-tcp-network
+    healthcheck:
+      test: [ "CMD", "nginx", "-t" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      laravel-php-nginx-tcp:
+        condition: service_healthy
+
+networks:
+  laravel-nginx-tcp-network:
+    driver: bridge
+
+  redis-cluster-dev:
+    external: true
+
+  postgres-dev-network:
+    external: true
