@@ -1,8 +1,21 @@
 # ==========================================
-# Laravel PHP-FPM Nginx Socket (Boilerplate)
+# Laravel PHP-FPM TCP (Boilerplate)
 # ==========================================
 
-.PHONY: help up down restart build rebuild logs status shell-php shell-nginx clean setup artisan migrate
+.PHONY: \
+	help \
+	check-files \
+	up up-prod down restart build rebuild \
+	logs logs-php logs-nginx logs-node \
+	status \
+	shell-php shell-nginx shell-node \
+	setup install-deps \
+	composer-install composer-update composer-require \
+	npm-install npm-dev npm-build \
+	artisan composer \
+	migrate rollback fresh tinker test-php \
+	permissions cleanup-nginx \
+	clean clean-all dev-reset
 
 # Цвета для вывода
 YELLOW=\033[0;33m
@@ -114,7 +127,7 @@ npm-install: ## Установить NPM зависимости
 npm-dev: ## Запустить Vite в режиме разработки (hot reload)
 	$(COMPOSE) exec $(NODE_SERVICE) npm run dev
 
-npm-build: ## Собрать фронтенд (внутри PHP контейнера для prod-like билда или dev)
+npm-build: ## Собрать фронтенд (внутри Node контейнера)
 	$(COMPOSE) exec $(NODE_SERVICE) npm run build
 
 artisan: ## Запустить команду artisan (make artisan CMD="migrate")
