@@ -66,7 +66,17 @@ DB_PORT=5432
 
 3) Если вы подключаетесь к БД-контейнеру в Docker (а не к managed DB), убедитесь что app-сервис находится в той же сети.
    В текущем шаблоне в `docker-compose.yml` по умолчанию подключена внешняя сеть `postgres-dev-network`.
-   Для MySQL, как правило, потребуется заменить её на вашу MySQL-сеть (или удалить этот network, если БД вне Docker).
+   При переключении БД не забудьте переключить и сеть у сервиса `laravel-php-nginx-tcp`: либо `postgres-dev-network`, либо `mysql-dev-network` (или удалите этот network, если БД вне Docker).
+
+   Пример (переключение делается прямо в `services.laravel-php-nginx-tcp.networks`):
+   ```yml
+   services:
+     laravel-php-nginx-tcp:
+       networks:
+         - laravel-nginx-tcp-network
+         - postgres-dev-network
+         # - mysql-dev-network
+   ```
 
 ### PostgreSQL: создание базы и подключение
 

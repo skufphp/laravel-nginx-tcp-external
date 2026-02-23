@@ -67,7 +67,18 @@ services:
 - для PostgreSQL: `DB_CONNECTION=pgsql`, `DB_PORT=5432`
 - для MySQL: `DB_CONNECTION=mysql`, `DB_PORT=3306`
 
-Если БД находится в Docker (в другом compose-проекте), app-контейнер должен быть в той же сети. В шаблоне по умолчанию в `docker-compose.yml` подключена внешняя сеть `postgres-dev-network` — при использовании MySQL обычно потребуется заменить её на вашу MySQL-сеть (или удалить этот network, если вы ходите в managed DB/наружу Docker).
+Если БД находится в Docker (в другом compose-проекте), app-контейнер должен быть в той же сети. В шаблоне по умолчанию в `docker-compose.yml` подключена внешняя сеть `postgres-dev-network`. При переключении БД не забудьте переключить и сеть: либо `postgres-dev-network`, либо `mysql-dev-network` (или удалите этот network, если вы ходите в managed DB/наружу Docker).
+
+Переключение делается прямо в `services.laravel-php-nginx-tcp.networks`:
+
+```yml
+services:
+  laravel-php-nginx-tcp:
+    networks:
+      - laravel-nginx-tcp-network
+      - postgres-dev-network
+      # - mysql-dev-network
+```
 
 ### 2.2 PostgreSQL (external)
 
