@@ -52,7 +52,6 @@ services:
     restart: unless-stopped
     environment:
       <<: *laravel-env
-    volumes:
     working_dir: /var/www/laravel
     command: >
       sh -c "
@@ -87,7 +86,6 @@ services:
     pull_policy: never
     container_name: laravel-nginx-tcp-core
     restart: unless-stopped
-    volumes:
     ports:
       - "${NGINX_PORT:-8050}:80"
     networks:
