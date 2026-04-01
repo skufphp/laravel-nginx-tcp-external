@@ -139,8 +139,6 @@ services:
       laravel-php-nginx-tcp-core:
         condition: service_healthy
 
-volumes:
-
 networks:
   laravel-nginx-tcp-core-network:
     driver: bridge
